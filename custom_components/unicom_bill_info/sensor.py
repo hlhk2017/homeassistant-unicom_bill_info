@@ -243,7 +243,7 @@ class ChinaUnicomDataSensor(SensorEntity):
                     break
         elif self._sensor_type == "data":
             for item in data:
-                if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+                if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "1":
                     used_value_str = item.get("X_USED_VALUE", "0.00MB")
                     # Extract numeric value and unit
                     try:
@@ -711,7 +711,7 @@ class ChinaUnicomDataUsedSensor(SensorEntity):
     def _handle_coordinator_update(self):
         data = self.coordinator.data["voice_sms_data"]
         for item in data:
-            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "1":
                 used_value_str = item.get("X_USED_VALUE", "0.00MB")
                 try:
                     value = float(used_value_str.replace('MB', '').replace('GB', ''))
@@ -781,7 +781,7 @@ class ChinaUnicomDataTotalSensor(SensorEntity):
     def _handle_coordinator_update(self):
         data = self.coordinator.data["voice_sms_data"]
         for item in data:
-            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "1":
                 addup_upper_str = item.get("ADDUP_UPPER", "0.00MB")
                 mb_value = self._convert_to_mb(addup_upper_str)
                 if mb_value >= 1024:
@@ -848,7 +848,7 @@ class ChinaUnicomDataAvailableSensor(SensorEntity):
     def _handle_coordinator_update(self):
         data = self.coordinator.data["voice_sms_data"]
         for item in data:
-            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "1":
                 canuse_value_str = item.get("X_CANUSE_VALUE", "0.00MB")
                 mb_value = self._convert_to_mb(canuse_value_str)
                 if mb_value >= 1024:
@@ -915,7 +915,7 @@ class ChinaUnicomDataExceedSensor(SensorEntity):
     def _handle_coordinator_update(self):
         data = self.coordinator.data["voice_sms_data"]
         for item in data:
-            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "1":
                 exceed_value_str = item.get("X_EXCEED_VALUE", "0.00MB")
                 mb_value = self._convert_to_mb(exceed_value_str)
                 if mb_value >= 1024:
@@ -982,7 +982,7 @@ class ChinaUnicomDataUsageRatioSensor(SensorEntity):
     def _handle_coordinator_update(self):
         data = self.coordinator.data["voice_sms_data"]
         for item in data:
-            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "1":
                 try:
                     # 将比例值（0-1范围）乘以100作为状态值，Home Assistant会处理显示为百分比
                     self._state = round(float(item.get("USED_RATIO", -1)) * 100, 2) if item.get("USED_RATIO") != "-1" else None # 修改此处
