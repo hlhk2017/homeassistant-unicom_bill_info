@@ -5,14 +5,13 @@ import async_timeout
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
-# from homeassistant.const import UnitOfData # 移除此行，因为UnitOfData无法直接导入
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
-from homeassistant.core import callback # 新增此行，解决NameError
+from homeassistant.core import callback
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,7 +41,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         openid,
         _LOGGER,
         scan_interval_td,
-        domain 
+        domain
     )
 
     await coordinator.async_config_entry_first_refresh()
@@ -68,7 +67,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             ChinaUnicomDataTotalSensor(coordinator, name),
             ChinaUnicomDataAvailableSensor(coordinator, name),
             ChinaUnicomDataExceedSensor(coordinator, name),
-            ChinaUnicomDataUsageRatioSensor(coordinator, name), 
+            ChinaUnicomDataUsageRatioSensor(coordinator, name),
             # 账户余额独立实体
             ChinaUnicomTotalOwedSensor(coordinator, name),
             ChinaUnicomCreditValueSensor(coordinator, name),
@@ -222,7 +221,7 @@ class ChinaUnicomDataSensor(SensorEntity):
                         "超出": item.get("X_EXCEED_VALUE"),
                         "可用": item.get("X_CANUSE_VALUE"),
                         # 将属性里的使用比例格式化为百分比字符串
-                        "使用比例": f"{float(item.get('USED_RATIO', 0)) :.2f}%", 
+                        "使用比例": f"{float(item.get('USED_RATIO', 0)) :.2f}%",
                     }
                     updated = True
                     break
@@ -237,13 +236,14 @@ class ChinaUnicomDataSensor(SensorEntity):
                         "超出": item.get("X_EXCEED_VALUE"),
                         "可用": item.get("X_CANUSE_VALUE"),
                         # 将属性里的使用比例格式化为百分比字符串
-                        "使用比例": f"{float(item.get('USED_RATIO', 0)) :.2f}%", 
+                        "使用比例": f"{float(item.get('USED_RATIO', 0)) :.2f}%",
                     }
                     updated = True
                     break
         elif self._sensor_type == "data":
             for item in data:
-                if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+                # Modified to handle both "0" and "1" for SPECIAL_TYPE
+                if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") in ["0", "1"]:
                     used_value_str = item.get("X_USED_VALUE", "0.00MB")
                     # Extract numeric value and unit
                     try:
@@ -711,7 +711,8 @@ class ChinaUnicomDataUsedSensor(SensorEntity):
     def _handle_coordinator_update(self):
         data = self.coordinator.data["voice_sms_data"]
         for item in data:
-            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+            # Modified to handle both "0" and "1" for SPECIAL_TYPE
+            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") in ["0", "1"]:
                 used_value_str = item.get("X_USED_VALUE", "0.00MB")
                 try:
                     value = float(used_value_str.replace('MB', '').replace('GB', ''))
@@ -781,7 +782,8 @@ class ChinaUnicomDataTotalSensor(SensorEntity):
     def _handle_coordinator_update(self):
         data = self.coordinator.data["voice_sms_data"]
         for item in data:
-            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+            # Modified to handle both "0" and "1" for SPECIAL_TYPE
+            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") in ["0", "1"]:
                 addup_upper_str = item.get("ADDUP_UPPER", "0.00MB")
                 mb_value = self._convert_to_mb(addup_upper_str)
                 if mb_value >= 1024:
@@ -792,7 +794,7 @@ class ChinaUnicomDataTotalSensor(SensorEntity):
                     self._unit_of_measurement = "MB"
                 self.async_write_ha_state()
                 break
-    
+
     def _convert_to_mb(self, value_str):
         if 'MB' in value_str:
             return float(value_str.replace('MB', ''))
@@ -848,7 +850,8 @@ class ChinaUnicomDataAvailableSensor(SensorEntity):
     def _handle_coordinator_update(self):
         data = self.coordinator.data["voice_sms_data"]
         for item in data:
-            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+            # Modified to handle both "0" and "1" for SPECIAL_TYPE
+            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") in ["0", "1"]:
                 canuse_value_str = item.get("X_CANUSE_VALUE", "0.00MB")
                 mb_value = self._convert_to_mb(canuse_value_str)
                 if mb_value >= 1024:
@@ -859,7 +862,7 @@ class ChinaUnicomDataAvailableSensor(SensorEntity):
                     self._unit_of_measurement = "MB"
                 self.async_write_ha_state()
                 break
-    
+
     def _convert_to_mb(self, value_str):
         if 'MB' in value_str:
             return float(value_str.replace('MB', ''))
@@ -915,7 +918,8 @@ class ChinaUnicomDataExceedSensor(SensorEntity):
     def _handle_coordinator_update(self):
         data = self.coordinator.data["voice_sms_data"]
         for item in data:
-            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+            # Modified to handle both "0" and "1" for SPECIAL_TYPE
+            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") in ["0", "1"]:
                 exceed_value_str = item.get("X_EXCEED_VALUE", "0.00MB")
                 mb_value = self._convert_to_mb(exceed_value_str)
                 if mb_value >= 1024:
@@ -982,7 +986,8 @@ class ChinaUnicomDataUsageRatioSensor(SensorEntity):
     def _handle_coordinator_update(self):
         data = self.coordinator.data["voice_sms_data"]
         for item in data:
-            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") == "0":
+            # Modified to handle both "0" and "1" for SPECIAL_TYPE
+            if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") in ["0", "1"]:
                 try:
                     # 将比例值（0-1范围）乘以100作为状态值，Home Assistant会处理显示为百分比
                     self._state = round(float(item.get("USED_RATIO", -1)) * 100, 2) if item.get("USED_RATIO") != "-1" else None # 修改此处
@@ -1105,7 +1110,7 @@ class ChinaUnicomCreditValueSensor(SensorEntity):
         self.coordinator = coordinator
         self._base_name = base_name
         self._state = None
-        self._unit_of_measurement = "元" 
+        self._unit_of_measurement = "元"
 
     @property
     def name(self):
