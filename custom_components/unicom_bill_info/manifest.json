@@ -1,7 +1,7 @@
 {
     "domain": "unicom_bill_info",
     "name": "联通话费信息",
-    "version": "1.0.5",
+    "version": "1.0.7",
     "documentation": "https://github.com/hlhk2017/homeassistant-unicom_bill_info",
     "requirements": ["aiohttp>=3.8.1"],
     "dependencies": [],
