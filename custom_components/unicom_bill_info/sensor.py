@@ -366,9 +366,9 @@ class ChinaUnicomBalanceSensor(SensorEntity):
         """Handle updated data from the coordinator."""
         data = self.coordinator.data["balance_data"]
 
-        self._state = data.get("CANUSE_FEE_CUST")
+        self._state = data.get("FEE_AVAILABLE") # 修改：将可用余额设为主状态
         self._attributes = {
-            "当前余额": data.get("CURNT_BALANCE_CUST"),
+            "当前余额": data.get("CURNT_BALANCE_CUST"), # 修改：将当前余额设为属性
             "可用余额": data.get("FEE_AVAILABLE"),
             "总欠费": data.get("ALLBOWE_FEE_CUST"),
             "实时话费": data.get("REAL_FEE_CUST_NEW"),
@@ -989,8 +989,8 @@ class ChinaUnicomDataUsageRatioSensor(SensorEntity):
             # Modified to handle both "0" and "1" for SPECIAL_TYPE
             if item.get("SOURCE_TYPE") == "3" and item.get("SPECIAL_TYPE") in ["0", "1"]:
                 try:
-                    # 将比例值（0-1范围）乘以100作为状态值，Home Assistant会处理显示为百分比
-                    self._state = round(float(item.get("USED_RATIO", -1)) * 100, 2) if item.get("USED_RATIO") != "-1" else None # 修改此处
+                    # 修复：直接使用API返回的数值，因为它可能已经是百分比形式（例如12.8），无需再乘以100
+                    self._state = round(float(item.get("USED_RATIO", -1)), 2) if item.get("USED_RATIO") != "-1" else None
                 except ValueError:
                     self._state = None
                 self.async_write_ha_state()
